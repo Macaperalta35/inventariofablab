@@ -1,3 +1,12 @@
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/inventariofablab/sw.js')
+      .then(reg => console.log('SW Registered', reg))
+      .catch(err => console.log('SW Error', err));
+  });
+}
+
 // State management
 let state = {
   user: { name: 'Admin', role: 'admin' },
