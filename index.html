@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>INACAP | Fab Lab Inventory</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <div class="bg-blobs">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+    </div>
+
+    <div id="app">
+      <!-- Navigation -->
+      <nav class="navbar">
+        <div class="logo">
+          <i class="fas fa-microchip"></i>
+          FAB LAB <span>INACAP</span>
+        </div>
+        <div class="nav-links" id="nav-links">
+          <button class="btn btn-ghost" id="nav-dashboard">
+            <i class="fas fa-chart-line"></i> Dashboard
+          </button>
+          <button class="btn btn-ghost" id="nav-inventory">
+            <i class="fas fa-boxes"></i> Inventario
+          </button>
+          <button class="btn btn-ghost" id="nav-scan">
+            <i class="fas fa-qrcode"></i> Scan NFC
+          </button>
+          <div id="user-info" style="display: flex; align-items: center; gap: 10px;">
+            <span id="username-display">Admin</span>
+            <button class="btn btn-primary" id="btn-logout">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main class="main-container">
+        <!-- Dashboard View -->
+        <section id="view-dashboard" class="view">
+          <h1 style="margin-bottom: 2rem;">Dashboard General</h1>
+          <div class="dashboard-grid">
+            <div class="card stat-card">
+              <span class="stat-label">Total Activos</span>
+              <span class="stat-value" id="stat-total">124</span>
+            </div>
+            <div class="card stat-card">
+              <span class="stat-label">En Mantenimiento</span>
+              <span class="stat-value" id="stat-maintenance" style="color: var(--warning);">8</span>
+            </div>
+            <div class="card stat-card">
+              <span class="stat-label">Baja/Perdidos</span>
+              <span class="stat-value" id="stat-lost" style="color: var(--danger);">3</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-bottom: 1rem;">Escaneos Recientes</h3>
+            <div class="table-container">
+              <table id="recent-scans">
+                <thead>
+                  <tr>
+                    <th>Activo</th>
+                    <th>Operador</th>
+                    <th>Fecha/Hora</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Content via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Inventory View -->
+        <section id="view-inventory" class="view hidden">
+          <div class="section-header">
+            <h1>Gestión de Activos</h1>
+            <div class="search-wrapper">
+              <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+              <input type="text" id="inventory-search" class="search-input" placeholder="Buscar por nombre, código o categoría..." />
+            </div>
+            <button class="btn btn-primary" id="btn-add-asset">
+              <i class="fas fa-plus"></i> Nuevo Activo
+            </button>
+          </div>
+
+          <div class="inventory-section">
+            <div class="table-container">
+              <table id="inventory-table">
+                <thead>
+                  <tr>
+                    <th>Código NFC</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Estado</th>
+                    <th>Ubicación</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-list">
+                  <!-- Content via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Scanner View -->
+        <section id="view-scan" class="view hidden">
+          <div class="scanner-container">
+            <h1>Escáner NFC</h1>
+            <p class="text-dim">Acerque el tag NFC a la parte posterior de su dispositivo para identificar el activo.</p>
+            <div class="nfc-visual">
+              <i class="fas fa-tower-broadcast nfc-icon"></i>
+            </div>
+            <div id="scan-status" class="card" style="width: 100%; max-width: 400px; padding: 1rem;">
+              Esperando lectura...
+            </div>
+            <button class="btn btn-primary btn-lg" id="btn-start-scan">
+              Iniciar Lectura
+            </button>
+          </div>
+        </section>
+
+        <!-- Login View (Simplified for Demo) -->
+        <section id="view-login" class="view hidden">
+          <div style="max-width: 400px; margin: 4rem auto;" class="card">
+            <div style="text-align: center; margin-bottom: 2rem;">
+              <i class="fas fa-lock" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+              <h2>Acceso al Sistema</h2>
+            </div>
+            <div class="form-group">
+              <label>Usuario</label>
+              <input type="text" id="login-user" placeholder="Ej: admin_inacap" />
+            </div>
+            <div class="form-group">
+              <label>Rol</label>
+              <select id="login-role">
+                <option value="admin">Administrador</option>
+                <option value="operator">Operador / Staff</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center;" id="btn-login">
+              Entrar al Sistema
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <!-- Asset Modal -->
+      <div id="modal-asset" class="modal-overlay">
+        <div class="modal">
+          <h2 id="modal-title">Agregar Activo</h2>
+          <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;" />
+          <div class="form-group">
+            <label>Código NFC / ID</label>
+            <input type="text" id="asset-nfc" placeholder="Escanee o ingrese ID" />
+          </div>
+          <div class="form-group">
+            <label>Nombre del Activo</label>
+            <input type="text" id="asset-name" placeholder="Ej: Impresora 3D Ender 3" />
+          </div>
+          <div class="form-group">
+            <label>Categoría</label>
+            <select id="asset-category">
+              <option value="Maquinaria">Maquinaria</option>
+              <option value="Herramientas">Herramientas</option>
+              <option value="Electrónica">Electrónica</option>
+              <option value="Insumos">Insumos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Estado</label>
+            <select id="asset-status">
+              <option value="active">Activo</option>
+              <option value="maintenance">Mantenimiento</option>
+              <option value="lost">Baja / Perdido</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="btn btn-ghost" style="flex: 1; justify-content: center;" id="btn-modal-cancel">Cancelar</button>
+            <button class="btn btn-primary" style="flex: 1; justify-content: center;" id="btn-modal-save">Guardar</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
