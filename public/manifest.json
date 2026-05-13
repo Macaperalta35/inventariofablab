@@ -8,9 +8,9 @@
   "theme_color": "#ED1C24",
   "icons": [
     {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "logo-inacap.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]

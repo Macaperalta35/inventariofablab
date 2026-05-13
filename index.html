@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   </head>
-  <body>
+  <body class="role-admin"> <!-- Default role for demo, changed via JS -->
     <div class="bg-blobs">
       <div class="blob blob-1"></div>
       <div class="blob blob-2"></div>
@@ -23,9 +23,10 @@
       <!-- Navigation -->
       <nav class="navbar">
         <div class="logo">
-          <i class="fas fa-microchip"></i>
+          <img src="logo-inacap.svg" alt="INACAP" style="height: 40px; margin-right: 10px;" />
           FAB LAB <span>INACAP</span>
         </div>
+        
         <div class="nav-links" id="nav-links">
           <button class="btn btn-ghost" id="nav-dashboard">
             <i class="fas fa-chart-line"></i> Dashboard
@@ -36,9 +37,20 @@
           <button class="btn btn-ghost" id="nav-scan">
             <i class="fas fa-qrcode"></i> Scan NFC
           </button>
-          <div id="user-info" style="display: flex; align-items: center; gap: 10px;">
-            <span id="username-display">Admin</span>
-            <button class="btn btn-primary" id="btn-logout">
+          <button class="btn btn-ghost admin-only" id="nav-reports">
+            <i class="fas fa-file-excel"></i> Reportes
+          </button>
+          <button class="btn btn-ghost" id="nav-settings">
+            <i class="fas fa-cog"></i>
+          </button>
+          
+          <div id="user-info" class="user-profile">
+            <div class="avatar" id="user-initials">AD</div>
+            <div style="display: flex; flex-direction: column;">
+              <span id="username-display" style="font-size: 0.8rem; font-weight: 600;">Admin</span>
+              <span id="userrole-display" style="font-size: 0.6rem; color: var(--text-dim);">Administrador</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-logout" style="padding: 5px; border: none;">
               <i class="fas fa-sign-out-alt"></i>
             </button>
           </div>
@@ -46,7 +58,44 @@
       </nav>
 
       <main class="main-container">
-        <!-- Dashboard View -->
+        
+        <!-- View: Login -->
+        <section id="view-login" class="view hidden">
+          <div style="max-width: 450px; margin: 4rem auto;" class="card">
+            <div style="text-align: center; margin-bottom: 2.5rem;">
+              <img src="logo-inacap.svg" alt="INACAP" style="height: 60px; margin-bottom: 1.5rem;" />
+              <h2>Inventario Fab Lab</h2>
+              <p class="text-dim">Inicie sesión para gestionar los activos</p>
+            </div>
+            
+            <form id="login-form">
+              <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
+                <input type="email" id="login-email" placeholder="ejemplo@inacap.cl" required />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-lock"></i> Contraseña</label>
+                <input type="password" id="login-pass" placeholder="••••••••" required />
+              </div>
+              <div class="form-group">
+                <label>Rol de Acceso</label>
+                <select id="login-role-select">
+                  <option value="admin">Administrador (Gestión Total)</option>
+                  <option value="operator">Operador / Staff (Lectura/Reporte)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem;" id="btn-login-submit">
+                Entrar al Sistema
+              </button>
+            </form>
+            
+            <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-dim);">
+              ¿Olvidó su contraseña? Contacte al soporte técnico de Inacap.
+            </p>
+          </div>
+        </section>
+
+        <!-- View: Dashboard -->
         <section id="view-dashboard" class="view">
           <h1 style="margin-bottom: 2rem;">Dashboard General</h1>
           <div class="dashboard-grid">
@@ -76,15 +125,13 @@
                     <th>Estado</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <!-- Content via JS -->
-                </tbody>
+                <tbody></tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- Inventory View -->
+        <!-- View: Inventory -->
         <section id="view-inventory" class="view hidden">
           <div class="section-header">
             <h1>Gestión de Activos</h1>
@@ -92,7 +139,7 @@
               <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
               <input type="text" id="inventory-search" class="search-input" placeholder="Buscar por nombre, código o categoría..." />
             </div>
-            <button class="btn btn-primary" id="btn-add-asset">
+            <button class="btn btn-primary admin-only" id="btn-add-asset">
               <i class="fas fa-plus"></i> Nuevo Activo
             </button>
           </div>
@@ -107,18 +154,16 @@
                     <th>Categoría</th>
                     <th>Estado</th>
                     <th>Ubicación</th>
-                    <th>Acciones</th>
+                    <th class="admin-only">Acciones</th>
                   </tr>
                 </thead>
-                <tbody id="inventory-list">
-                  <!-- Content via JS -->
-                </tbody>
+                <tbody id="inventory-list"></tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- Scanner View -->
+        <!-- View: Scan -->
         <section id="view-scan" class="view hidden">
           <div class="scanner-container">
             <h1>Escáner NFC</h1>
@@ -126,38 +171,81 @@
             <div class="nfc-visual">
               <i class="fas fa-tower-broadcast nfc-icon"></i>
             </div>
-            <div id="scan-status" class="card" style="width: 100%; max-width: 400px; padding: 1rem;">
+            <div id="scan-status" class="card" style="width: 100%; max-width: 400px; padding: 1.5rem;">
               Esperando lectura...
             </div>
-            <button class="btn btn-primary btn-lg" id="btn-start-scan">
-              Iniciar Lectura
+            <button class="btn btn-primary btn-lg" id="btn-start-scan" style="padding: 1rem 3rem;">
+              <i class="fas fa-wifi"></i> Iniciar Lectura
             </button>
           </div>
         </section>
 
-        <!-- Login View (Simplified for Demo) -->
-        <section id="view-login" class="view hidden">
-          <div style="max-width: 400px; margin: 4rem auto;" class="card">
-            <div style="text-align: center; margin-bottom: 2rem;">
-              <i class="fas fa-lock" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
-              <h2>Acceso al Sistema</h2>
+        <!-- View: Reports -->
+        <section id="view-reports" class="view hidden">
+          <h1>Generación de Reportes</h1>
+          <p class="text-dim">Descargue la información detallada del inventario en formato Excel.</p>
+          
+          <div class="reports-grid">
+            <div class="report-btn" id="export-inventory-btn">
+              <i class="fas fa-file-excel"></i>
+              <strong>Inventario Completo</strong>
+              <p style="font-size: 0.7rem; color: var(--text-dim);">Todos los activos registrados</p>
             </div>
-            <div class="form-group">
-              <label>Usuario</label>
-              <input type="text" id="login-user" placeholder="Ej: admin_inacap" />
+            <div class="report-btn" id="export-maintenance-btn">
+              <i class="fas fa-tools"></i>
+              <strong>Mantenimiento</strong>
+              <p style="font-size: 0.7rem; color: var(--text-dim);">Activos que requieren revisión</p>
             </div>
-            <div class="form-group">
-              <label>Rol</label>
-              <select id="login-role">
-                <option value="admin">Administrador</option>
-                <option value="operator">Operador / Staff</option>
-              </select>
+            <div class="report-btn" id="export-scans-btn">
+              <i class="fas fa-history"></i>
+              <strong>Historial Escaneos</strong>
+              <p style="font-size: 0.7rem; color: var(--text-dim);">Registro de actividad mensual</p>
             </div>
-            <button class="btn btn-primary" style="width: 100%; justify-content: center;" id="btn-login">
-              Entrar al Sistema
-            </button>
           </div>
         </section>
+
+        <!-- View: Settings (Accessibility) -->
+        <section id="view-settings" class="view hidden">
+          <h1>Configuración y Accesibilidad</h1>
+          <div class="card" style="margin-top: 2rem;">
+            <div class="settings-panel">
+              <div class="toggle-group">
+                <div>
+                  <strong>Alto Contraste</strong>
+                  <p class="text-dim" style="font-size: 0.8rem;">Mejora la visibilidad con colores más oscuros y definidos.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="toggle-contrast">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <hr style="border: none; border-top: 1px solid var(--border);" />
+              
+              <div class="toggle-group">
+                <div>
+                  <strong>Texto Grande</strong>
+                  <p class="text-dim" style="font-size: 0.8rem;">Aumenta el tamaño de la fuente para facilitar la lectura.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="toggle-text-size">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <hr style="border: none; border-top: 1px solid var(--border);" />
+              
+              <div>
+                <strong>Idioma</strong>
+                <select style="margin-top: 0.5rem;">
+                  <option>Español (Chile)</option>
+                  <option disabled>English (Coming soon)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
 
       <!-- Asset Modal -->
