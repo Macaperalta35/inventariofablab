@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator) {
 
 // State management
 let state = {
-  user: null, // Initially null to force login
+  user: null, 
   assets: [
     { id: 'NFC001', name: 'Impresora 3D Creality K1', category: 'Maquinaria', status: 'active', location: 'Zona A' },
     { id: 'NFC002', name: 'Cortadora Láser CO2', category: 'Maquinaria', status: 'maintenance', location: 'Zona B' },
@@ -33,7 +33,11 @@ let state = {
 
 // DOM Elements
 const views = document.querySelectorAll('.view');
-const navLinks = document.getElementById('nav-links');
+const topNavbar = document.getElementById('top-navbar');
+const sidebar = document.getElementById('sidebar');
+const btnOpenMenu = document.getElementById('open-menu');
+const btnCloseMenu = document.getElementById('close-menu');
+
 const navButtons = {
   dashboard: document.getElementById('nav-dashboard'),
   inventory: document.getElementById('nav-inventory'),
@@ -41,6 +45,7 @@ const navButtons = {
   reports: document.getElementById('nav-reports'),
   settings: document.getElementById('nav-settings')
 };
+
 const inventoryList = document.getElementById('inventory-list');
 const recentScansList = document.querySelector('#recent-scans tbody');
 const searchInput = document.getElementById('inventory-search');
@@ -56,25 +61,46 @@ const loginForm = document.getElementById('login-form');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  createOverlay();
   setupEventListeners();
   checkSession();
 });
 
+function createOverlay() {
+  const overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  overlay.id = 'sidebar-overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', toggleMenu);
+}
+
 function checkSession() {
   if (!state.user) {
-    navLinks.style.display = 'none';
+    topNavbar.style.display = 'none';
     switchView('login');
   } else {
-    navLinks.style.display = 'flex';
+    topNavbar.style.display = 'flex';
     updateUserUI();
     switchView('dashboard');
   }
 }
 
+function toggleMenu() {
+  sidebar.classList.toggle('active');
+  document.getElementById('sidebar-overlay').classList.toggle('active');
+}
+
 function setupEventListeners() {
-  // Navigation
+  // Sidebar Toggles
+  btnOpenMenu.addEventListener('click', toggleMenu);
+  btnCloseMenu.addEventListener('click', toggleMenu);
+
+  // Navigation (from sidebar)
   Object.keys(navButtons).forEach(key => {
-    navButtons[key]?.addEventListener('click', () => switchView(key));
+    navButtons[key]?.addEventListener('click', () => {
+      switchView(key);
+      toggleMenu();
+    });
   });
 
   // Login
@@ -94,27 +120,26 @@ function setupEventListeners() {
   });
 
   // Search
-  searchInput.addEventListener('input', (e) => {
-    renderInventory(e.target.value);
-  });
+  searchInput.addEventListener('input', (e) => renderInventory(e.target.value));
 
   // Modal
-  btnAddAsset.addEventListener('click', () => {
-    openModal('Agregar Activo');
-  });
-
+  btnAddAsset?.addEventListener('click', () => openModal('Agregar Activo'));
   btnCancelModal.addEventListener('click', closeModal);
   btnSaveModal.addEventListener('click', saveAsset);
 
   // NFC Scanner
   btnStartScan.addEventListener('click', startNFCScan);
 
-  // Logout
-  document.getElementById('btn-logout').addEventListener('click', () => {
+  // Logout (both buttons)
+  const logoutAction = () => {
     state.user = null;
     localStorage.removeItem('fablab_user');
     checkSession();
-  });
+    if (sidebar.classList.contains('active')) toggleMenu();
+  };
+  
+  document.getElementById('btn-logout').addEventListener('click', logoutAction);
+  document.getElementById('btn-logout-sidebar').addEventListener('click', logoutAction);
 
   // Accessibility Toggles
   document.getElementById('toggle-contrast').addEventListener('change', (e) => {
@@ -127,8 +152,8 @@ function setupEventListeners() {
     document.body.classList.toggle('large-text', e.target.checked);
   });
 
-  // Report Buttons
-  document.getElementById('export-inventory-btn').addEventListener('click', () => exportToExcel(state.assets, 'Inventario_FabLab'));
+  // Reports
+  document.getElementById('export-inventory-btn').addEventListener('click', () => exportToExcel(state.assets, 'Inventario_Completo'));
   document.getElementById('export-maintenance-btn').addEventListener('click', () => {
     const maintenance = state.assets.filter(a => a.status === 'maintenance');
     exportToExcel(maintenance, 'Reporte_Mantenimiento');
@@ -138,41 +163,24 @@ function setupEventListeners() {
 
 function updateUserUI() {
   document.getElementById('username-display').textContent = state.user.name;
-  document.getElementById('userrole-display').textContent = state.user.role === 'admin' ? 'Administrador' : 'Operador / Staff';
   document.getElementById('user-initials').textContent = state.user.name.substring(0, 2).toUpperCase();
   
-  // Apply role class to body
-  document.body.className = ''; // Reset
+  document.body.className = ''; 
   document.body.classList.add(`role-${state.user.role}`);
   if (state.accessibility.highContrast) document.body.classList.add('high-contrast');
   if (state.accessibility.largeText) document.body.classList.add('large-text');
 }
 
-// View Switching
 function switchView(viewId) {
   state.currentView = viewId;
   views.forEach(v => v.classList.add('hidden'));
   document.getElementById(`view-${viewId}`).classList.remove('hidden');
 
-  // Update Nav Active State
-  if (viewId !== 'login') {
-    Object.values(navButtons).forEach(btn => btn?.classList.remove('btn-primary'));
-    Object.values(navButtons).forEach(btn => btn?.classList.add('btn-ghost'));
-    navButtons[viewId]?.classList.remove('btn-ghost');
-    navButtons[viewId]?.classList.add('btn-primary');
-  }
-
-  // Refresh data if needed
-  if (viewId === 'dashboard') {
-    updateStats();
-    renderRecentScans();
-  }
-  if (viewId === 'inventory') {
-    renderInventory();
-  }
+  if (viewId === 'dashboard') { updateStats(); renderRecentScans(); }
+  if (viewId === 'inventory') renderInventory();
 }
 
-// Rendering
+// Reuse existing rendering, modal, and export logic from previous version...
 function renderInventory(filter = '') {
   const filtered = state.assets.filter(a => 
     a.name.toLowerCase().includes(filter.toLowerCase()) || 
@@ -218,13 +226,10 @@ function formatStatus(status) {
   return map[status] || status;
 }
 
-// Modal Logic
 let editingId = null;
-
 function openModal(title, asset = null) {
   document.getElementById('modal-title').textContent = title;
   modal.classList.add('active');
-  
   if (asset) {
     editingId = asset.id;
     document.getElementById('asset-nfc').value = asset.id;
@@ -238,9 +243,7 @@ function openModal(title, asset = null) {
   }
 }
 
-function closeModal() {
-  modal.classList.remove('active');
-}
+function closeModal() { modal.classList.remove('active'); }
 
 function saveAsset() {
   const newAsset = {
@@ -250,19 +253,11 @@ function saveAsset() {
     status: document.getElementById('asset-status').value,
     location: 'Sede Inacap'
   };
-
-  if (editingId) {
-    state.assets = state.assets.map(a => a.id === editingId ? newAsset : a);
-  } else {
-    state.assets.push(newAsset);
-  }
-
-  renderInventory();
-  updateStats();
-  closeModal();
+  if (editingId) state.assets = state.assets.map(a => a.id === editingId ? newAsset : a);
+  else state.assets.push(newAsset);
+  renderInventory(); updateStats(); closeModal();
 }
 
-// Excel Export
 function exportToExcel(data, filename) {
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
@@ -270,36 +265,22 @@ function exportToExcel(data, filename) {
   XLSX.writeFile(wb, `${filename}_${new Date().toLocaleDateString()}.xlsx`);
 }
 
-// Global exposure
 window.editAsset = (id) => {
   const asset = state.assets.find(a => a.id === id);
   openModal('Editar Activo', asset);
 };
 
-// NFC logic
 async function startNFCScan() {
   if (!('NDEFReader' in window)) {
-    scanStatus.innerHTML = `
-      <div style="color: var(--danger);">
-        <i class="fas fa-exclamation-triangle"></i> Web NFC no soportada.<br>
-        <small>Simulando para demo...</small>
-      </div>
-      <button class="btn btn-ghost mt-2" id="mock-scan">Simular Lectura</button>
-    `;
-    setTimeout(() => {
-      document.getElementById('mock-scan')?.addEventListener('click', simulateScan);
-    }, 100);
+    scanStatus.innerHTML = `<div>Web NFC no soportada.<br><button class="btn btn-ghost mt-2" id="mock-scan">Simular Lectura</button></div>`;
+    setTimeout(() => document.getElementById('mock-scan')?.addEventListener('click', simulateScan), 100);
     return;
   }
-
   try {
-    const ndef = new NDEFReader();
-    await ndef.scan();
+    const ndef = new NDEFReader(); await ndef.scan();
     scanStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Escaneando...';
     ndef.addEventListener("reading", ({ serialNumber }) => handleScanResult(serialNumber));
-  } catch (error) {
-    scanStatus.innerHTML = `<span style="color: var(--danger);">Error: ${error.message}</span>`;
-  }
+  } catch (error) { scanStatus.innerHTML = `Error: ${error.message}`; }
 }
 
 function simulateScan() {
@@ -310,20 +291,9 @@ function simulateScan() {
 function handleScanResult(serialNumber) {
   const asset = state.assets.find(a => a.id === serialNumber);
   if (asset) {
-    scanStatus.innerHTML = `
-      <div class="fade-in">
-        <h3 style="color: var(--success);">¡Identificado!</h3>
-        <p><strong>${asset.name}</strong></p>
-        <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="viewAssetDetails('${asset.id}')">Ver Detalles</button>
-      </div>
-    `;
+    scanStatus.innerHTML = `<div class="fade-in"><h3>¡Identificado!</h3><p><strong>${asset.name}</strong></p><button class="btn btn-primary" onclick="viewAssetDetails('${asset.id}')">Ver Detalles</button></div>`;
     state.recentScans.unshift({ asset: asset.name, user: state.user.name, time: 'Recién', status: asset.status });
-  } else {
-    scanStatus.innerHTML = `<div><h3>Tag Desconocido</h3><p>ID: ${serialNumber}</p></div>`;
-  }
+  } else scanStatus.innerHTML = `<div><h3>Tag Desconocido</h3><p>ID: ${serialNumber}</p></div>`;
 }
 
-window.viewAssetDetails = (id) => {
-  switchView('inventory');
-  editAsset(id);
-};
+window.viewAssetDetails = (id) => { switchView('inventory'); editAsset(id); };
