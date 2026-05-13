@@ -1,17 +1,21 @@
 {
-  "name": "Fab Lab INACAP Inventory",
+  "name": "Inventario Fab Lab INACAP",
   "short_name": "FabLab Inv",
-  "description": "Sistema de gestión de activos y escaneo NFC para Fab Lab INACAP",
   "start_url": "/inventariofablab/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#ED1C24",
   "icons": [
     {
-      "src": "logo-inacap.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
     }
   ]
 }
