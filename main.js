@@ -103,20 +103,29 @@ function setupEventListeners() {
     });
   });
 
-  // Login
+  // Login with Test Account Check
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
     const role = document.getElementById('login-role-select').value;
     
-    state.user = {
-      name: email.split('@')[0],
-      email: email,
-      role: role
-    };
-    
-    localStorage.setItem('fablab_user', JSON.stringify(state.user));
-    checkSession();
+    // Test Credentials
+    const TEST_USER = "admin@inacap.cl";
+    const TEST_PASS = "fablab2024";
+
+    if (email === TEST_USER && pass === TEST_PASS) {
+      state.user = {
+        name: "Admin FabLab",
+        email: email,
+        role: role
+      };
+      
+      localStorage.setItem('fablab_user', JSON.stringify(state.user));
+      checkSession();
+    } else {
+      alert("Credenciales incorrectas. Pruebe con admin@inacap.cl / fablab2024");
+    }
   });
 
   // Search
