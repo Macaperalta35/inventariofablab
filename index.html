@@ -12,6 +12,8 @@
     <link rel="apple-touch-icon" href="/inventariofablab/icon.png" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   </head>
   <body>
     <div class="bg-blobs">
@@ -220,20 +222,31 @@
           <p class="text-dim">Descargue la información detallada del inventario en formato Excel.</p>
           
           <div class="reports-grid">
-            <div class="report-btn" id="export-inventory-btn">
-              <i class="fas fa-file-excel"></i>
-              <strong>Inventario Completo</strong>
-              <p style="font-size: 0.7rem; color: var(--text-dim);">Todos los activos registrados</p>
+            <div class="card report-card">
+              <i class="fas fa-boxes" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+              <h3>Inventario Total</h3>
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button class="btn btn-ghost btn-sm" id="export-inventory-excel"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn btn-ghost btn-sm" id="export-inventory-pdf"><i class="fas fa-file-pdf"></i> PDF</button>
+              </div>
             </div>
-            <div class="report-btn" id="export-maintenance-btn">
-              <i class="fas fa-tools"></i>
-              <strong>Mantenimiento</strong>
-              <p style="font-size: 0.7rem; color: var(--text-dim);">Activos que requieren revisión</p>
+
+            <div class="card report-card">
+              <i class="fas fa-tools" style="font-size: 2rem; color: var(--warning); margin-bottom: 1rem;"></i>
+              <h3>Mantenimiento</h3>
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button class="btn btn-ghost btn-sm" id="export-maint-excel"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn btn-ghost btn-sm" id="export-maint-pdf"><i class="fas fa-file-pdf"></i> PDF</button>
+              </div>
             </div>
-            <div class="report-btn" id="export-scans-btn">
-              <i class="fas fa-history"></i>
-              <strong>Historial Escaneos</strong>
-              <p style="font-size: 0.7rem; color: var(--text-dim);">Registro de actividad mensual</p>
+
+            <div class="card report-card">
+              <i class="fas fa-history" style="font-size: 2rem; color: var(--success); margin-bottom: 1rem;"></i>
+              <h3>Historial Scans</h3>
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button class="btn btn-ghost btn-sm" id="export-scans-excel"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn btn-ghost btn-sm" id="export-scans-pdf"><i class="fas fa-file-pdf"></i> PDF</button>
+              </div>
             </div>
           </div>
         </section>

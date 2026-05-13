@@ -82,7 +82,7 @@ function checkSession() {
 
   if (!state.user) {
     topNavbar.style.display = 'none';
-    document.body.className = ''; // Remove all role classes
+    document.body.className = ''; 
     switchView('login');
   } else {
     topNavbar.style.display = 'flex';
@@ -109,24 +109,18 @@ function setupEventListeners() {
     });
   });
 
-  // Login with Test Account Check
+  // Login
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
     const role = document.getElementById('login-role-select').value;
     
-    // Test Credentials
     const TEST_USER = "admin@inacap.cl";
     const TEST_PASS = "fablab2024";
 
     if (email === TEST_USER && pass === TEST_PASS) {
-      state.user = {
-        name: "Admin FabLab",
-        email: email,
-        role: role
-      };
-      
+      state.user = { name: "Admin FabLab", email: email, role: role };
       localStorage.setItem('fablab_user', JSON.stringify(state.user));
       checkSession();
     } else {
@@ -145,15 +139,13 @@ function setupEventListeners() {
   // NFC Scanner
   btnStartScan.addEventListener('click', startNFCScan);
 
-  // Logout (both buttons)
+  // Logout
   const logoutAction = () => {
     state.user = null;
     localStorage.removeItem('fablab_user');
     checkSession();
     if (sidebar.classList.contains('active')) toggleMenu();
   };
-  
-  document.getElementById('btn-logout').addEventListener('click', logoutAction);
   document.getElementById('btn-logout-sidebar').addEventListener('click', logoutAction);
 
   // Accessibility Toggles (Main Menu)
@@ -161,7 +153,6 @@ function setupEventListeners() {
     state.accessibility.highContrast = e.target.checked;
     syncAccessibility();
   });
-
   document.getElementById('toggle-text-size').addEventListener('change', (e) => {
     state.accessibility.largeText = e.target.checked;
     syncAccessibility();
@@ -172,29 +163,33 @@ function setupEventListeners() {
     state.accessibility.highContrast = e.target.checked;
     syncAccessibility();
   });
-
   document.getElementById('login-toggle-text-size')?.addEventListener('change', (e) => {
     state.accessibility.largeText = e.target.checked;
     syncAccessibility();
   });
 
-  // Reports
-  document.getElementById('export-inventory-btn').addEventListener('click', () => exportToExcel(state.assets, 'Inventario_Completo'));
-  document.getElementById('export-maintenance-btn').addEventListener('click', () => {
+  // Reports Excel
+  document.getElementById('export-inventory-excel')?.addEventListener('click', () => exportToExcel(state.assets, 'Inventario_Total'));
+  document.getElementById('export-maint-excel')?.addEventListener('click', () => {
     const maintenance = state.assets.filter(a => a.status === 'maintenance');
     exportToExcel(maintenance, 'Reporte_Mantenimiento');
   });
-  document.getElementById('export-scans-btn').addEventListener('click', () => exportToExcel(state.recentScans, 'Historial_Escaneos'));
+  document.getElementById('export-scans-excel')?.addEventListener('click', () => exportToExcel(state.recentScans, 'Historial_Escaneos'));
+
+  // Reports PDF
+  document.getElementById('export-inventory-pdf')?.addEventListener('click', () => exportToPDF(state.assets, 'Reporte de Inventario Total'));
+  document.getElementById('export-maint-pdf')?.addEventListener('click', () => {
+    const maintenance = state.assets.filter(a => a.status === 'maintenance');
+    exportToPDF(maintenance, 'Reporte de Activos en Mantenimiento');
+  });
+  document.getElementById('export-scans-pdf')?.addEventListener('click', () => exportToPDF(state.recentScans, 'Reporte de Historial de Escaneos'));
 }
 
 function syncAccessibility() {
   document.body.classList.toggle('high-contrast', state.accessibility.highContrast);
   document.body.classList.toggle('large-text', state.accessibility.largeText);
-  
-  // Sync checkboxes
   const contrastToggles = [document.getElementById('toggle-contrast'), document.getElementById('login-toggle-contrast')];
   const textToggles = [document.getElementById('toggle-text-size'), document.getElementById('login-toggle-text-size')];
-  
   contrastToggles.forEach(t => { if(t) t.checked = state.accessibility.highContrast; });
   textToggles.forEach(t => { if(t) t.checked = state.accessibility.largeText; });
 }
@@ -202,7 +197,6 @@ function syncAccessibility() {
 function updateUserUI() {
   document.getElementById('username-display').textContent = state.user.name;
   document.getElementById('user-initials').textContent = state.user.name.substring(0, 2).toUpperCase();
-  
   document.body.className = ''; 
   document.body.classList.add(`role-${state.user.role}`);
   syncAccessibility();
@@ -212,19 +206,16 @@ function switchView(viewId) {
   state.currentView = viewId;
   views.forEach(v => v.classList.add('hidden'));
   document.getElementById(`view-${viewId}`).classList.remove('hidden');
-
   if (viewId === 'dashboard') { updateStats(); renderRecentScans(); }
   if (viewId === 'inventory') renderInventory();
 }
 
-// Reuse existing rendering, modal, and export logic from previous version...
 function renderInventory(filter = '') {
   const filtered = state.assets.filter(a => 
     a.name.toLowerCase().includes(filter.toLowerCase()) || 
     a.id.toLowerCase().includes(filter.toLowerCase()) ||
     a.category.toLowerCase().includes(filter.toLowerCase())
   );
-
   inventoryList.innerHTML = filtered.map(asset => `
     <tr>
       <td><code>${asset.id}</code></td>
@@ -279,7 +270,6 @@ function openModal(title, asset = null) {
     document.getElementById('asset-name').value = '';
   }
 }
-
 function closeModal() { modal.classList.remove('active'); }
 
 function saveAsset() {
@@ -295,11 +285,41 @@ function saveAsset() {
   renderInventory(); updateStats(); closeModal();
 }
 
+// Export Logic
 function exportToExcel(data, filename) {
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Datos");
   XLSX.writeFile(wb, `${filename}_${new Date().toLocaleDateString()}.xlsx`);
+}
+
+function exportToPDF(data, title) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  // Header
+  doc.setFontSize(20);
+  doc.setTextColor(237, 28, 36); // INACAP Red
+  doc.text('INACAP FAB LAB', 14, 22);
+  
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.text(title, 14, 32);
+  doc.text(`Fecha: ${new Date().toLocaleString()}`, 14, 40);
+  
+  // Table
+  const headers = Object.keys(data[0]);
+  const body = data.map(item => Object.values(item));
+  
+  doc.autoTable({
+    startY: 50,
+    head: [headers],
+    body: body,
+    theme: 'striped',
+    headStyles: { fillColor: [0, 56, 101] } // INACAP Blue
+  });
+  
+  doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
 }
 
 window.editAsset = (id) => {
