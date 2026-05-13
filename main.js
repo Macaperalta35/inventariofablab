@@ -75,8 +75,14 @@ function createOverlay() {
 }
 
 function checkSession() {
+  const savedUser = localStorage.getItem('fablab_user');
+  if (savedUser && !state.user) {
+    state.user = JSON.parse(savedUser);
+  }
+
   if (!state.user) {
     topNavbar.style.display = 'none';
+    document.body.className = ''; // Remove all role classes
     switchView('login');
   } else {
     topNavbar.style.display = 'flex';
