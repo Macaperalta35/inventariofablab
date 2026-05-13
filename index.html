@@ -76,7 +76,7 @@
       <main class="main-container">
         
         <!-- View: Login -->
-        <section id="view-login" class="view hidden">
+        <section id="view-login" class="view">
           <div style="max-width: 450px; margin: 4rem auto;" class="card">
             <div style="text-align: center; margin-bottom: 2.5rem;">
               <img src="logo-inacap.svg" alt="INACAP" style="height: 60px; margin-bottom: 1.5rem;" />
@@ -108,11 +108,29 @@
             <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-dim);">
               ¿Olvidó su contraseña? Contacte al soporte técnico de Inacap.
             </p>
+            
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;" />
+            <div class="settings-panel">
+              <div class="toggle-group">
+                <span style="font-size: 0.8rem;">Alto Contraste</span>
+                <label class="switch">
+                  <input type="checkbox" id="login-toggle-contrast">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="toggle-group">
+                <span style="font-size: 0.8rem;">Texto Grande</span>
+                <label class="switch">
+                  <input type="checkbox" id="login-toggle-text-size">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
           </div>
         </section>
 
         <!-- View: Dashboard -->
-        <section id="view-dashboard" class="view">
+        <section id="view-dashboard" class="view hidden">
           <h1 style="margin-bottom: 2rem;">Dashboard General</h1>
           <div class="dashboard-grid">
             <div class="card stat-card">

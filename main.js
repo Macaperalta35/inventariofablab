@@ -156,15 +156,26 @@ function setupEventListeners() {
   document.getElementById('btn-logout').addEventListener('click', logoutAction);
   document.getElementById('btn-logout-sidebar').addEventListener('click', logoutAction);
 
-  // Accessibility Toggles
+  // Accessibility Toggles (Main Menu)
   document.getElementById('toggle-contrast').addEventListener('change', (e) => {
     state.accessibility.highContrast = e.target.checked;
-    document.body.classList.toggle('high-contrast', e.target.checked);
+    syncAccessibility();
   });
 
   document.getElementById('toggle-text-size').addEventListener('change', (e) => {
     state.accessibility.largeText = e.target.checked;
-    document.body.classList.toggle('large-text', e.target.checked);
+    syncAccessibility();
+  });
+
+  // Accessibility Toggles (Login Screen)
+  document.getElementById('login-toggle-contrast')?.addEventListener('change', (e) => {
+    state.accessibility.highContrast = e.target.checked;
+    syncAccessibility();
+  });
+
+  document.getElementById('login-toggle-text-size')?.addEventListener('change', (e) => {
+    state.accessibility.largeText = e.target.checked;
+    syncAccessibility();
   });
 
   // Reports
@@ -176,14 +187,25 @@ function setupEventListeners() {
   document.getElementById('export-scans-btn').addEventListener('click', () => exportToExcel(state.recentScans, 'Historial_Escaneos'));
 }
 
+function syncAccessibility() {
+  document.body.classList.toggle('high-contrast', state.accessibility.highContrast);
+  document.body.classList.toggle('large-text', state.accessibility.largeText);
+  
+  // Sync checkboxes
+  const contrastToggles = [document.getElementById('toggle-contrast'), document.getElementById('login-toggle-contrast')];
+  const textToggles = [document.getElementById('toggle-text-size'), document.getElementById('login-toggle-text-size')];
+  
+  contrastToggles.forEach(t => { if(t) t.checked = state.accessibility.highContrast; });
+  textToggles.forEach(t => { if(t) t.checked = state.accessibility.largeText; });
+}
+
 function updateUserUI() {
   document.getElementById('username-display').textContent = state.user.name;
   document.getElementById('user-initials').textContent = state.user.name.substring(0, 2).toUpperCase();
   
   document.body.className = ''; 
   document.body.classList.add(`role-${state.user.role}`);
-  if (state.accessibility.highContrast) document.body.classList.add('high-contrast');
-  if (state.accessibility.largeText) document.body.classList.add('large-text');
+  syncAccessibility();
 }
 
 function switchView(viewId) {

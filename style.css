@@ -105,7 +105,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
+  padding: 1rem 1.5rem;
   background: var(--glass);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -415,6 +415,7 @@ input:focus {
   .section-header { flex-direction: column; align-items: stretch; }
   .search-wrapper { max-width: none; }
 }
+
 /* Sidebar (Hamburger Menu) */
 .sidebar {
   position: fixed;
@@ -600,3 +601,5 @@ body.role-admin .admin-only {
   margin-bottom: 0.5rem;
   display: block;
 }
+
+.hidden { display: none !important; }
