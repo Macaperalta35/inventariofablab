@@ -13,11 +13,11 @@ if ('serviceWorker' in navigator) {
 let state = {
   user: null, 
   assets: [
-    { id: 'NFC001', name: 'Impresora 3D Creality K1', category: 'Maquinaria', status: 'active', location: 'Zona A' },
-    { id: 'NFC002', name: 'Cortadora Láser CO2', category: 'Maquinaria', status: 'maintenance', location: 'Zona B' },
-    { id: 'NFC003', name: 'Osciloscopio Digital', category: 'Electrónica', status: 'active', location: 'Laboratorio 1' },
-    { id: 'NFC004', name: 'Kit Herramientas Mecánicas', category: 'Herramientas', status: 'active', location: 'Taller' },
-    { id: 'NFC005', name: 'Router CNC', category: 'Maquinaria', status: 'lost', location: 'Zona B' },
+    { id: 'NFC001', name: 'Impresora 3D Creality K1', category: 'Maquinaria', status: 'active', location: 'Zona A', image: 'https://images.unsplash.com/photo-1631034301594-39912066f7d4?auto=format&fit=crop&q=80&w=400' },
+    { id: 'NFC002', name: 'Cortadora Láser CO2', category: 'Maquinaria', status: 'maintenance', location: 'Zona B', image: 'https://images.unsplash.com/photo-1610412430030-9759247076d3?auto=format&fit=crop&q=80&w=400' },
+    { id: 'NFC003', name: 'Osciloscopio Digital', category: 'Electrónica', status: 'active', location: 'Laboratorio 1', image: 'https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?auto=format&fit=crop&q=80&w=400' },
+    { id: 'NFC004', name: 'Kit Herramientas Mecánicas', category: 'Herramientas', status: 'active', location: 'Taller', image: 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&q=80&w=400' },
+    { id: 'NFC005', name: 'Router CNC', category: 'Maquinaria', status: 'lost', location: 'Zona B', image: 'https://images.unsplash.com/photo-1590846083693-f23fdede4a6d?auto=format&fit=crop&q=80&w=400' },
   ],
   recentScans: [
     { asset: 'Impresora 3D Creality K1', user: 'Juan Pérez', time: 'Hace 5 min', status: 'active' },
@@ -128,8 +128,9 @@ function setupEventListeners() {
     }
   });
 
-  // Search
-  searchInput.addEventListener('input', (e) => renderInventory(e.target.value));
+  // Search & Filter
+  searchInput.addEventListener('input', () => renderInventory());
+  document.getElementById('inventory-filter-category').addEventListener('change', () => renderInventory());
 
   // Modal
   btnAddAsset?.addEventListener('click', () => openModal('Agregar Activo'));
@@ -210,16 +211,28 @@ function switchView(viewId) {
   if (viewId === 'inventory') renderInventory();
 }
 
-function renderInventory(filter = '') {
-  const filtered = state.assets.filter(a => 
-    a.name.toLowerCase().includes(filter.toLowerCase()) || 
-    a.id.toLowerCase().includes(filter.toLowerCase()) ||
-    a.category.toLowerCase().includes(filter.toLowerCase())
-  );
+function renderInventory() {
+  const searchTerm = searchInput.value.toLowerCase();
+  const categoryFilter = document.getElementById('inventory-filter-category').value;
+
+  const filtered = state.assets.filter(a => {
+    const matchesSearch = a.name.toLowerCase().includes(searchTerm) || a.id.toLowerCase().includes(searchTerm);
+    const matchesCategory = categoryFilter === 'all' || a.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
   inventoryList.innerHTML = filtered.map(asset => `
     <tr>
       <td><code>${asset.id}</code></td>
-      <td><strong>${asset.name}</strong></td>
+      <td>
+        <div class="item-name-cell">
+          <strong>${asset.name}</strong>
+          <div class="item-tooltip">
+            <img src="${asset.image || 'https://via.placeholder.com/200x150?text=Sin+Imagen'}" alt="${asset.name}">
+            <span class="tooltip-title">${asset.name}</span>
+          </div>
+        </div>
+      </td>
       <td>${asset.category}</td>
       <td><span class="status-badge status-${asset.status}">${formatStatus(asset.status)}</span></td>
       <td>${asset.location}</td>
@@ -264,10 +277,12 @@ function openModal(title, asset = null) {
     document.getElementById('asset-name').value = asset.name;
     document.getElementById('asset-category').value = asset.category;
     document.getElementById('asset-status').value = asset.status;
+    document.getElementById('asset-image').value = asset.image || '';
   } else {
     editingId = null;
     document.getElementById('asset-nfc').value = '';
     document.getElementById('asset-name').value = '';
+    document.getElementById('asset-image').value = '';
   }
 }
 function closeModal() { modal.classList.remove('active'); }
@@ -278,6 +293,7 @@ function saveAsset() {
     name: document.getElementById('asset-name').value,
     category: document.getElementById('asset-category').value,
     status: document.getElementById('asset-status').value,
+    image: document.getElementById('asset-image').value,
     location: 'Sede Inacap'
   };
   if (editingId) state.assets = state.assets.map(a => a.id === editingId ? newAsset : a);
