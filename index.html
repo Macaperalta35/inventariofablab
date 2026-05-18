@@ -178,10 +178,9 @@
             <div class="filter-wrapper">
               <select id="inventory-filter-category" class="search-input" style="padding-left: 1rem; min-width: 150px;">
                 <option value="all">Todas las Categorías</option>
-                <option value="Maquinaria">Maquinaria</option>
                 <option value="Herramientas">Herramientas</option>
-                <option value="Electrónica">Electrónica</option>
                 <option value="Insumos">Insumos</option>
+                <option value="Químicos">Químicos</option>
               </select>
             </div>
             <button class="btn btn-primary admin-only" id="btn-add-asset">
@@ -196,7 +195,9 @@
                   <tr>
                     <th>Código NFC</th>
                     <th>Nombre</th>
+                    <th>Descripción</th>
                     <th>Categoría</th>
+                    <th>Stock</th>
                     <th>Estado</th>
                     <th>Ubicación</th>
                     <th class="admin-only">Acciones</th>
@@ -309,7 +310,7 @@
         <div class="modal">
           <h2 id="modal-title">Agregar Activo</h2>
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;" />
-          <div class="form-group">
+                    <div class="form-group">
             <label>Código NFC / ID</label>
             <input type="text" id="asset-nfc" placeholder="Escanee o ingrese ID" />
           </div>
@@ -318,12 +319,29 @@
             <input type="text" id="asset-name" placeholder="Ej: Impresora 3D Ender 3" />
           </div>
           <div class="form-group">
+            <label>Descripción</label>
+            <input type="text" id="asset-desc" placeholder="Detalles del activo" />
+          </div>
+          <div class="form-group" style="display: flex; gap: 1rem;">
+            <div style="flex: 1;">
+              <label>Stock Total</label>
+              <input type="number" id="asset-total" value="1" min="0" />
+            </div>
+            <div style="flex: 1;">
+              <label>Disponible</label>
+              <input type="number" id="asset-avail" value="1" min="0" />
+            </div>
+            <div style="flex: 1;">
+              <label>Prestado</label>
+              <input type="number" id="asset-borrowed" value="0" min="0" />
+            </div>
+          </div>
+          <div class="form-group">
             <label>Categoría</label>
             <select id="asset-category">
-              <option value="Maquinaria">Maquinaria</option>
               <option value="Herramientas">Herramientas</option>
-              <option value="Electrónica">Electrónica</option>
               <option value="Insumos">Insumos</option>
+              <option value="Químicos">Químicos</option>
             </select>
           </div>
           <div class="form-group">
@@ -335,8 +353,10 @@
             </select>
           </div>
           <div class="form-group">
-            <label>URL de Imagen</label>
-            <input type="text" id="asset-image" placeholder="https://ejemplo.com/imagen.jpg" />
+            <label>Fotografía del Producto</label>
+            <input type="file" id="asset-image-file" accept="image/*" />
+            <input type="hidden" id="asset-image" />
+            <div id="image-preview" style="margin-top: 10px; text-align: center;"></div>
           </div>
           <div style="display: flex; gap: 1rem; margin-top: 2rem;">
             <button class="btn btn-ghost" style="flex: 1; justify-content: center;" id="btn-modal-cancel">Cancelar</button>

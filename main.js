@@ -13,11 +13,7 @@ if ('serviceWorker' in navigator) {
 let state = {
   user: null, 
   assets: [
-    { id: 'NFC001', name: 'Impresora 3D Creality K1', category: 'Maquinaria', status: 'active', location: 'Zona A', image: 'https://images.unsplash.com/photo-1631034301594-39912066f7d4?auto=format&fit=crop&q=80&w=400' },
-    { id: 'NFC002', name: 'Cortadora Láser CO2', category: 'Maquinaria', status: 'maintenance', location: 'Zona B', image: 'https://images.unsplash.com/photo-1610412430030-9759247076d3?auto=format&fit=crop&q=80&w=400' },
-    { id: 'NFC003', name: 'Osciloscopio Digital', category: 'Electrónica', status: 'active', location: 'Laboratorio 1', image: 'https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?auto=format&fit=crop&q=80&w=400' },
-    { id: 'NFC004', name: 'Kit Herramientas Mecánicas', category: 'Herramientas', status: 'active', location: 'Taller', image: 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&q=80&w=400' },
-    { id: 'NFC005', name: 'Router CNC', category: 'Maquinaria', status: 'lost', location: 'Zona B', image: 'https://images.unsplash.com/photo-1590846083693-f23fdede4a6d?auto=format&fit=crop&q=80&w=400' },
+    
   ],
   recentScans: [
     { asset: 'Impresora 3D Creality K1', user: 'Juan Pérez', time: 'Hace 5 min', status: 'active' },
@@ -221,28 +217,46 @@ function renderInventory() {
     return matchesSearch && matchesCategory;
   });
 
-  inventoryList.innerHTML = filtered.map(asset => `
-    <tr>
-      <td><code>${asset.id}</code></td>
-      <td>
-        <div class="item-name-cell">
-          <strong>${asset.name}</strong>
-          <div class="item-tooltip">
-            <img src="${asset.image || 'https://via.placeholder.com/200x150?text=Sin+Imagen'}" alt="${asset.name}">
-            <span class="tooltip-title">${asset.name}</span>
+  // Group by category
+  const grouped = filtered.reduce((acc, curr) => {
+    if (!acc[curr.category]) acc[curr.category] = [];
+    acc[curr.category].push(curr);
+    return acc;
+  }, {});
+
+  let html = '';
+  for (const [category, items] of Object.entries(grouped)) {
+    html += `<tr class="category-header"><td colspan="8" style="background: var(--surface); font-weight: bold; padding: 1rem;">Sección: ${category}</td></tr>`;
+    html += items.map(asset => `
+      <tr>
+        <td><code>${asset.id}</code></td>
+        <td>
+          <div class="item-name-cell">
+            <strong>${asset.name}</strong>
+            <div class="item-tooltip">
+              <img src="${asset.image || 'https://via.placeholder.com/200x150?text=Sin+Imagen'}" alt="${asset.name}">
+              <span class="tooltip-title">${asset.name}</span>
+            </div>
           </div>
-        </div>
-      </td>
-      <td>${asset.category}</td>
-      <td><span class="status-badge status-${asset.status}">${formatStatus(asset.status)}</span></td>
-      <td>${asset.location}</td>
-      <td class="admin-only">
-        <button class="btn btn-ghost btn-sm" onclick="editAsset('${asset.id}')">
-          <i class="fas fa-edit"></i>
-        </button>
-      </td>
-    </tr>
-  `).join('');
+        </td>
+        <td>${asset.description || ''}</td>
+        <td>${asset.category}</td>
+        <td>${asset.available} / ${asset.total}</td>
+        <td><span class="status-badge status-${asset.status}">${formatStatus(asset.status)}</span></td>
+        <td>${asset.location}</td>
+        <td class="admin-only" style="display:flex;gap:5px;">
+          <button class="btn btn-ghost btn-sm" onclick="editAsset('${asset.id}')" title="Editar">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deleteAsset('${asset.id}')" title="Eliminar">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  inventoryList.innerHTML = html;
 }
 
 function renderRecentScans() {
@@ -271,17 +285,30 @@ let editingId = null;
 function openModal(title, asset = null) {
   document.getElementById('modal-title').textContent = title;
   modal.classList.add('active');
+  document.getElementById('image-preview').innerHTML = '';
+  document.getElementById('asset-image-file').value = '';
   if (asset) {
     editingId = asset.id;
     document.getElementById('asset-nfc').value = asset.id;
     document.getElementById('asset-name').value = asset.name;
+    document.getElementById('asset-desc').value = asset.description || '';
     document.getElementById('asset-category').value = asset.category;
     document.getElementById('asset-status').value = asset.status;
+    document.getElementById('asset-total').value = asset.total || 0;
+    document.getElementById('asset-avail').value = asset.available || 0;
+    document.getElementById('asset-borrowed').value = asset.borrowed || 0;
     document.getElementById('asset-image').value = asset.image || '';
+    if(asset.image) {
+      document.getElementById('image-preview').innerHTML = `<img src="${asset.image}" style="max-height: 100px; border-radius: 4px;" />`;
+    }
   } else {
     editingId = null;
     document.getElementById('asset-nfc').value = '';
     document.getElementById('asset-name').value = '';
+    document.getElementById('asset-desc').value = '';
+    document.getElementById('asset-total').value = '1';
+    document.getElementById('asset-avail').value = '1';
+    document.getElementById('asset-borrowed').value = '0';
     document.getElementById('asset-image').value = '';
   }
 }
@@ -291,8 +318,12 @@ function saveAsset() {
   const newAsset = {
     id: document.getElementById('asset-nfc').value,
     name: document.getElementById('asset-name').value,
+    description: document.getElementById('asset-desc').value,
     category: document.getElementById('asset-category').value,
     status: document.getElementById('asset-status').value,
+    total: parseInt(document.getElementById('asset-total').value) || 0,
+    available: parseInt(document.getElementById('asset-avail').value) || 0,
+    borrowed: parseInt(document.getElementById('asset-borrowed').value) || 0,
     image: document.getElementById('asset-image').value,
     location: 'Sede Inacap'
   };
@@ -300,6 +331,20 @@ function saveAsset() {
   else state.assets.push(newAsset);
   renderInventory(); updateStats(); closeModal();
 }
+
+// Handle file input for images
+document.getElementById('asset-image-file').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const b64 = evt.target.result;
+      document.getElementById('asset-image').value = b64;
+      document.getElementById('image-preview').innerHTML = `<img src="${b64}" style="max-height: 100px; border-radius: 4px;" />`;
+    };
+    reader.readAsDataURL(file);
+  }
+});
 
 // Export Logic
 function exportToExcel(data, filename) {
@@ -370,3 +415,11 @@ function handleScanResult(serialNumber) {
 }
 
 window.viewAssetDetails = (id) => { switchView('inventory'); editAsset(id); };
+
+window.deleteAsset = (id) => {
+  if(confirm('¿Está seguro de que desea eliminar este activo?')) {
+    state.assets = state.assets.filter(a => a.id !== id);
+    renderInventory();
+    updateStats();
+  }
+};
