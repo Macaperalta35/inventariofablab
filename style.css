@@ -127,6 +127,13 @@ body {
   color: var(--primary);
 }
 
+/* Invert INACAP logo for dark background visibility */
+.logo img,
+.sidebar-header img,
+.card img[alt="INACAP"] {
+  filter: brightness(0) invert(1);
+}
+
 .nav-links {
   display: flex;
   gap: 1rem;
