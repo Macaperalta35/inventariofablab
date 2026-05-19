@@ -43,6 +43,9 @@
           <button class="btn btn-ghost admin-only" id="nav-reports">
             <i class="fas fa-file-excel"></i> Reportes
           </button>
+          <button class="btn btn-ghost admin-only" id="nav-users">
+            <i class="fas fa-users"></i> Usuarios
+          </button>
           <button class="btn btn-ghost" id="nav-settings">
             <i class="fas fa-cog"></i> Accesibilidad
           </button>
@@ -261,6 +264,37 @@
           </div>
         </section>
 
+        <!-- View: Users -->
+        <section id="view-users" class="view hidden">
+          <div class="section-header">
+            <div>
+              <h1>Gestión de Usuarios</h1>
+              <p class="text-dim">Administre los operadores y administradores con acceso al sistema.</p>
+            </div>
+            <button class="btn btn-primary admin-only" id="btn-add-user">
+              <i class="fas fa-user-plus"></i> Nuevo Usuario
+            </button>
+          </div>
+
+          <div class="card" style="margin-top: 1.5rem;">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th class="admin-only">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="users-list"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <!-- View: Settings (Accessibility) -->
         <section id="view-settings" class="view hidden">
           <h1>Configuración y Accesibilidad</h1>
@@ -365,6 +399,37 @@
           <div style="display: flex; gap: 1rem; margin-top: 2rem;">
             <button class="btn btn-ghost" style="flex: 1; justify-content: center;" id="btn-modal-cancel">Cancelar</button>
             <button class="btn btn-primary" style="flex: 1; justify-content: center;" id="btn-modal-save">Guardar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Modal -->
+      <div id="modal-user" class="modal-overlay">
+        <div class="modal">
+          <h2 id="user-modal-title">Agregar Usuario</h2>
+          <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;" />
+          <div class="form-group">
+            <label>Nombre Completo</label>
+            <input type="text" id="user-name" placeholder="Ej: Pedro Gómez" />
+          </div>
+          <div class="form-group">
+            <label>Correo Electrónico</label>
+            <input type="email" id="user-email" placeholder="correo@inacap.cl" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="user-password" placeholder="••••••••" />
+          </div>
+          <div class="form-group">
+            <label>Rol</label>
+            <select id="user-role">
+              <option value="admin">Administrador</option>
+              <option value="operator">Operador / Staff</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="btn btn-ghost" style="flex: 1; justify-content: center;" id="btn-user-modal-cancel">Cancelar</button>
+            <button class="btn btn-primary" style="flex: 1; justify-content: center;" id="btn-user-modal-save">Guardar</button>
           </div>
         </div>
       </div>

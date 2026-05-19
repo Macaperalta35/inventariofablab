@@ -104,6 +104,23 @@ let state = {
   }
 };
 
+// ── User Management (stored in localStorage) ───────────────────
+const DEFAULT_ADMIN = { id: 1, name: 'Admin FabLab', email: 'admin@inacap.cl', password: 'fablab2024', role: 'admin', active: true };
+
+function getUsers() {
+  const stored = localStorage.getItem('fablab_users');
+  if (!stored) {
+    const users = [DEFAULT_ADMIN];
+    localStorage.setItem('fablab_users', JSON.stringify(users));
+    return users;
+  }
+  return JSON.parse(stored);
+}
+
+function saveUsers(users) {
+  localStorage.setItem('fablab_users', JSON.stringify(users));
+}
+
 // DOM Elements
 const views = document.querySelectorAll('.view');
 const topNavbar = document.getElementById('top-navbar');
@@ -116,6 +133,7 @@ const navButtons = {
   inventory: document.getElementById('nav-inventory'),
   scan: document.getElementById('nav-scan'),
   reports: document.getElementById('nav-reports'),
+  users: document.getElementById('nav-users'),
   settings: document.getElementById('nav-settings')
 };
 
@@ -193,11 +211,21 @@ function setupEventListeners() {
     const TEST_PASS = "fablab2024";
 
     if (email === TEST_USER && pass === TEST_PASS) {
-      state.user = { name: "Admin FabLab", email: email, role: role };
+      // Legacy admin check
+      state.user = { name: 'Admin FabLab', email: email, role: 'admin', id: 1 };
       localStorage.setItem('fablab_user', JSON.stringify(state.user));
       checkSession();
     } else {
-      alert("Credenciales incorrectas. Pruebe con admin@inacap.cl / fablab2024");
+      // Check against registered users
+      const users = getUsers();
+      const found = users.find(u => u.email === email && u.password === pass && u.active);
+      if (found) {
+        state.user = { name: found.name, email: found.email, role: found.role, id: found.id };
+        localStorage.setItem('fablab_user', JSON.stringify(state.user));
+        checkSession();
+      } else {
+        alert('Credenciales incorrectas o usuario inactivo.');
+      }
     }
   });
 
@@ -282,6 +310,7 @@ function switchView(viewId) {
   document.getElementById(`view-${viewId}`).classList.remove('hidden');
   if (viewId === 'dashboard') { updateStats(); renderRecentScans(); }
   if (viewId === 'inventory') renderInventory();
+  if (viewId === 'users') renderUsers();
 }
 
 function renderInventory() {
@@ -502,3 +531,101 @@ window.deleteAsset = (id) => {
     updateStats();
   }
 };
+
+// ── Users Management ─────────────────────────────────────────────
+
+function renderUsers() {
+  const users = getUsers();
+  const tbody = document.getElementById('users-list');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  users.forEach(u => {
+    const roleBadge = u.role === 'admin'
+      ? '<span style="background:#ED1C24;color:white;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:700;">Admin</span>'
+      : '<span style="background:#003865;color:white;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:700;">Operador</span>';
+    const statusBadge = u.active
+      ? '<span style="color:#16a34a;font-weight:600;">✔ Activo</span>'
+      : '<span style="color:#dc2626;font-weight:600;">✘ Inactivo</span>';
+    tbody.innerHTML += `
+      <tr>
+        <td>${u.id}</td>
+        <td><strong>${u.name}</strong></td>
+        <td>${u.email}</td>
+        <td>${roleBadge}</td>
+        <td>${statusBadge}</td>
+        <td class="admin-only" style="display:table-cell;">
+          <button class="btn btn-ghost btn-sm" onclick="editUser(${u.id})" title="Editar">
+            <i class="fas fa-edit"></i>
+          </button>
+          ${u.id !== 1 ? `<button class="btn btn-ghost btn-sm" onclick="toggleUserActive(${u.id})" title="${u.active ? 'Desactivar' : 'Activar'}" style="color:${u.active ? '#dc2626' : '#16a34a'}">
+            <i class="fas fa-${u.active ? 'ban' : 'check-circle'}"></i>
+          </button>` : ''}
+        </td>
+      </tr>`;
+  });
+}
+
+let editingUserId = null;
+const userModal = document.getElementById('modal-user');
+
+function openUserModal(title, user = null) {
+  document.getElementById('user-modal-title').textContent = title;
+  userModal.classList.add('active');
+  editingUserId = user ? user.id : null;
+  document.getElementById('user-name').value = user ? user.name : '';
+  document.getElementById('user-email').value = user ? user.email : '';
+  document.getElementById('user-password').value = '';
+  document.getElementById('user-role').value = user ? user.role : 'operator';
+  document.getElementById('user-password').placeholder = user ? 'Dejar vacío para no cambiar' : 'Contraseña';
+}
+
+function closeUserModal() { userModal.classList.remove('active'); }
+
+function saveUser() {
+  const name = document.getElementById('user-name').value.trim();
+  const email = document.getElementById('user-email').value.trim();
+  const password = document.getElementById('user-password').value;
+  const role = document.getElementById('user-role').value;
+  if (!name || !email) { alert('Nombre y correo son requeridos.'); return; }
+
+  const users = getUsers();
+  if (editingUserId) {
+    const idx = users.findIndex(u => u.id === editingUserId);
+    if (idx >= 0) {
+      users[idx].name = name;
+      users[idx].email = email;
+      users[idx].role = role;
+      if (password) users[idx].password = password;
+    }
+  } else {
+    const duplicate = users.find(u => u.email === email);
+    if (duplicate) { alert('Ya existe un usuario con ese correo.'); return; }
+    if (!password) { alert('La contraseña es requerida para nuevos usuarios.'); return; }
+    const newId = Math.max(...users.map(u => u.id)) + 1;
+    users.push({ id: newId, name, email, password, role, active: true });
+  }
+  saveUsers(users);
+  renderUsers();
+  closeUserModal();
+}
+
+window.editUser = (id) => {
+  const user = getUsers().find(u => u.id === id);
+  if (user) openUserModal('Editar Usuario', user);
+};
+
+window.toggleUserActive = (id) => {
+  const users = getUsers();
+  const u = users.find(u => u.id === id);
+  if (u) {
+    u.active = !u.active;
+    saveUsers(users);
+    renderUsers();
+  }
+};
+
+// Wire up users view buttons
+document.getElementById('btn-add-user')?.addEventListener('click', () => openUserModal('Nuevo Usuario'));
+document.getElementById('btn-user-modal-cancel')?.addEventListener('click', closeUserModal);
+document.getElementById('btn-user-modal-save')?.addEventListener('click', saveUser);
+
