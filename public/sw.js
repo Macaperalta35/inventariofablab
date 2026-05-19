@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fablab-inv-v2';
+const CACHE_NAME = 'fablab-inv-v3';
 const ASSETS = [
   '/inventariofablab/',
   '/inventariofablab/index.html',
