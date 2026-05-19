@@ -588,9 +588,13 @@ body.role-admin button.admin-only {
   display: flex;
 }
 
-body.role-admin th.admin-only,
-body.role-admin td.admin-only {
+body.role-admin th.admin-only {
   display: table-cell;
+}
+
+body.role-admin td.admin-only {
+  display: flex;
+  gap: 5px;
 }
 
 /* Reports Section */

@@ -82,6 +82,27 @@ Para usar el sistema como una aplicación en tu celular:
 
 ---
 
+## 🔒 Reporte de Pruebas de Calidad (QA) y Seguridad
+
+Se ha llevado a cabo un ciclo completo de auditoría y pruebas automatizadas (QA) sobre el sistema para garantizar la robustez del control de acceso basado en roles (RBAC) y la integridad de la interfaz visual institucional:
+
+### 📋 Pruebas Verificadas con Éxito
+1. **Protección contra Credenciales Inválidas**: Intentos con correos o contraseñas incorrectas son detectados y rechazados en la interfaz de Login.
+2. **Branding e Interfaz Limpia**: Validación visual del nuevo tema institucional en fondos claros (blanco puro y gris claro) con acentos de color **Rojo INACAP** e iconografía de alto contraste.
+3. **Gestión Completa de Usuarios**:
+   - Creación exitosa de usuarios operadores (ej. `Pedro QA` -> `pedro@inacap.cl`).
+   - Almacenamiento seguro en la memoria local (`localStorage`).
+   - Cierre de sesión seguro invalidando los tokens y estados activos.
+
+### 🛡️ Corrección de Vulnerabilidad Crítica Detectada
+Durante el proceso de pruebas de calidad (QA), se identificó que el rol de **Operador** tenía acceso de escritura no autorizado sobre el inventario debido a que las columnas de edición y eliminación sobrescribían sus reglas de visibilidad CSS por un estilo `display:flex` embebido directamente en la etiqueta HTML (`style="display:flex"`).
+
+**Acciones Tomadas para Asegurar el Sistema**:
+- **Corrección de CSS**: Se trasladó el diseño flex del botón de acciones directamente a la regla condicional del Administrador en `style.css` (`body.role-admin td.admin-only`), permitiendo que el navegador oculte completamente la columna para los operadores.
+- **Seguridad en JavaScript (Front-End Hardening)**: Se implementó una verificación de rol estricta en las funciones `window.editAsset` y `window.deleteAsset`. Si un operador intenta gatillar estas funciones de forma manual a través de la consola del navegador, la ejecución es bloqueada inmediatamente.
+
+---
+
 ## 👨‍💻 Contribución
 
 Este sistema fue desarrollado por **Macaperalta35** con el apoyo de la asistencia técnica de IA para el Fab Lab INACAP.

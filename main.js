@@ -350,7 +350,7 @@ function renderInventory() {
         <td>${asset.available} / ${asset.total}</td>
         <td><span class="status-badge status-${asset.status}">${formatStatus(asset.status)}</span></td>
         <td>${asset.location}</td>
-        <td class="admin-only" style="display:flex;gap:5px;">
+        <td class="admin-only">
           <button class="btn btn-ghost btn-sm" onclick="editAsset('${asset.id}')" title="Editar">
             <i class="fas fa-edit"></i>
           </button>
@@ -492,6 +492,10 @@ function exportToPDF(data, title) {
 }
 
 window.editAsset = (id) => {
+  if (state.user?.role !== 'admin') {
+    alert('Acceso denegado: Se requieren permisos de administrador.');
+    return;
+  }
   const asset = state.assets.find(a => a.id === id);
   openModal('Editar Activo', asset);
 };
@@ -525,6 +529,10 @@ function handleScanResult(serialNumber) {
 window.viewAssetDetails = (id) => { switchView('inventory'); editAsset(id); };
 
 window.deleteAsset = (id) => {
+  if (state.user?.role !== 'admin') {
+    alert('Acceso denegado: Se requieren permisos de administrador.');
+    return;
+  }
   if(confirm('¿Está seguro de que desea eliminar este activo?')) {
     state.assets = state.assets.filter(a => a.id !== id);
     renderInventory();
