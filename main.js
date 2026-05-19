@@ -371,6 +371,7 @@ function openModal(title, asset = null) {
     document.getElementById('asset-desc').value = asset.description || '';
     document.getElementById('asset-category').value = asset.category;
     document.getElementById('asset-status').value = asset.status;
+    document.getElementById('asset-location').value = asset.location || '';
     document.getElementById('asset-total').value = asset.total || 0;
     document.getElementById('asset-avail').value = asset.available || 0;
     document.getElementById('asset-borrowed').value = asset.borrowed || 0;
@@ -386,6 +387,7 @@ function openModal(title, asset = null) {
     document.getElementById('asset-total').value = '1';
     document.getElementById('asset-avail').value = '1';
     document.getElementById('asset-borrowed').value = '0';
+    document.getElementById('asset-location').value = 'FabLab';
     document.getElementById('asset-image').value = '';
   }
 }
@@ -402,7 +404,7 @@ function saveAsset() {
     available: parseInt(document.getElementById('asset-avail').value) || 0,
     borrowed: parseInt(document.getElementById('asset-borrowed').value) || 0,
     image: document.getElementById('asset-image').value,
-    location: 'Sede Inacap'
+    location: document.getElementById('asset-location').value || 'FabLab'
   };
   if (editingId) state.assets = state.assets.map(a => a.id === editingId ? newAsset : a);
   else state.assets.push(newAsset);
