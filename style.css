@@ -5,16 +5,16 @@
   --primary-dark: #c41820;
   --secondary: #003865;
   --accent: #FFD700;
-  --bg: #0f172a;
-  --card: #1e293b;
-  --card-hover: #334155;
-  --text: #f8fafc;
-  --text-dim: #94a3b8;
-  --border: rgba(255, 255, 255, 0.1);
-  --glass: rgba(30, 41, 59, 0.7);
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --bg: #f5f5f5;
+  --card: #ffffff;
+  --card-hover: #f0f0f0;
+  --text: #1a1a1a;
+  --text-dim: #555555;
+  --border: rgba(0, 0, 0, 0.12);
+  --glass: rgba(255, 255, 255, 0.9);
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
   --radius: 16px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --font-size-base: 16px;
@@ -73,7 +73,7 @@ body {
 .blob {
   position: absolute;
   filter: blur(80px);
-  opacity: 0.15;
+  opacity: 0.07;
   border-radius: 50%;
   animation: move 20s infinite alternate;
 }
@@ -106,12 +106,13 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background: var(--glass);
+  background: #ffffff;
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--primary);
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .logo {
@@ -127,11 +128,11 @@ body {
   color: var(--primary);
 }
 
-/* Invert INACAP logo for dark background visibility */
+/* Logo natural colors on white background */
 .logo img,
 .sidebar-header img,
 .card img[alt="INACAP"] {
-  filter: brightness(0) invert(1);
+  filter: none;
 }
 
 .nav-links {
@@ -171,7 +172,8 @@ body {
 }
 
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(237, 28, 36, 0.07);
+  border-color: var(--primary);
 }
 
 /* Main Content */
@@ -200,8 +202,9 @@ body {
 }
 
 .card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--primary);
   transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(237,28,36,0.1);
 }
 
 .stat-card {
@@ -250,18 +253,19 @@ body {
 
 .search-input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f9f9f9;
   border: 1px solid var(--border);
   padding: 0.8rem 1rem 0.8rem 2.5rem;
   border-radius: 10px;
-  color: white;
+  color: var(--text);
   outline: none;
   transition: var(--transition);
 }
 
 .search-input:focus {
   border-color: var(--primary);
-  background: rgba(255, 255, 255, 0.08);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(237,28,36,0.08);
 }
 
 .table-container {
@@ -276,17 +280,19 @@ table {
 
 th {
   padding: 1rem 1.5rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: #f8f8f8;
   color: var(--text-dim);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.85rem;
   text-transform: uppercase;
+  border-bottom: 2px solid var(--primary);
 }
 
 td {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
   font-size: 0.95rem;
+  color: var(--text);
 }
 
 tr:last-child td {
@@ -294,7 +300,7 @@ tr:last-child td {
 }
 
 tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(237, 28, 36, 0.03);
 }
 
 .status-badge {
@@ -394,17 +400,19 @@ label {
 
 input, select {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f9f9f9;
   border: 1px solid var(--border);
   padding: 0.8rem 1rem;
   border-radius: 10px;
-  color: white;
+  color: var(--text);
   font-family: inherit;
 }
 
-input:focus {
+input:focus, select:focus {
   border-color: var(--primary);
   outline: none;
+  box-shadow: 0 0 0 3px rgba(237,28,36,0.08);
+  background: #fff;
 }
 
 /* Roles */
@@ -432,16 +440,15 @@ input:focus {
   left: -300px; /* Hidden by default */
   width: 280px;
   height: 100vh;
-  background: var(--card);
-  backdrop-filter: blur(20px);
-  border-right: 1px solid var(--border);
+  background: #ffffff;
+  border-right: 3px solid var(--primary);
   z-index: 2000;
   padding: 1.5rem;
   transition: var(--transition);
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  box-shadow: 20px 0 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.12);
 }
 
 .sidebar.active {
@@ -555,7 +562,7 @@ input:checked + .slider:before {
   align-items: center;
   gap: 12px;
   padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f5f5f5;
   border-radius: 50px;
   border: 1px solid var(--border);
 }
