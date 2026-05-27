@@ -411,6 +411,60 @@
         </div>
       </div>
 
+      <!-- Loan Modal -->
+      <div id="modal-loan" class="modal-overlay">
+        <div class="modal">
+          <h2 id="loan-modal-title">Prestar Activo</h2>
+          <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;" />
+          <input type="hidden" id="loan-asset-id" />
+          <div class="form-group">
+            <label>Cantidad a Prestar</label>
+            <input type="number" id="loan-qty" value="1" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Nombre del Solicitante</label>
+            <input type="text" id="loan-borrower-name" placeholder="Ej: Juan Pérez" />
+          </div>
+          <div class="form-group">
+            <label>RUT / ID (Opcional)</label>
+            <input type="text" id="loan-borrower-rut" placeholder="Ej: 12.345.678-9" />
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="btn btn-ghost" style="flex: 1; justify-content: center;" id="btn-loan-modal-cancel">Cancelar</button>
+            <button class="btn btn-primary" style="flex: 1; justify-content: center;" id="btn-loan-modal-save">Registrar Préstamo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Return Modal -->
+      <div id="modal-return" class="modal-overlay">
+        <div class="modal">
+          <h2 id="return-modal-title">Recibir Activo</h2>
+          <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;" />
+          <input type="hidden" id="return-asset-id" />
+          <div class="form-group">
+            <label>Cantidad a Devolver</label>
+            <input type="number" id="return-qty" value="1" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Estado de Recepción</label>
+            <select id="return-condition">
+              <option value="good">Bueno (Sin daños)</option>
+              <option value="damaged">Dañado</option>
+              <option value="incomplete">Incompleto / Faltan partes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Reporte / Observaciones</label>
+            <textarea id="return-notes" placeholder="Detalle el estado o problemas encontrados..." style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);"></textarea>
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="btn btn-ghost" style="flex: 1; justify-content: center;" id="btn-return-modal-cancel">Cancelar</button>
+            <button class="btn btn-primary" style="flex: 1; justify-content: center;" id="btn-return-modal-save">Confirmar Recepción</button>
+          </div>
+        </div>
+      </div>
+
       <!-- User Modal -->
       <div id="modal-user" class="modal-overlay">
         <div class="modal">

@@ -352,6 +352,14 @@ function renderInventory() {
         <td><span class="status-badge status-${asset.status}">${formatStatus(asset.status)}</span></td>
         <td>${asset.location}</td>
         <td class="admin-only">
+          ${asset.available > 0 ? `
+          <button class="btn btn-ghost btn-sm" style="color:var(--primary);" onclick="openLoanModal('${asset.id}')" title="Prestar">
+            <i class="fas fa-hand-holding"></i>
+          </button>` : ''}
+          ${asset.borrowed > 0 ? `
+          <button class="btn btn-ghost btn-sm" style="color:var(--success);" onclick="openReturnModal('${asset.id}')" title="Recibir">
+            <i class="fas fa-undo"></i>
+          </button>` : ''}
           <button class="btn btn-ghost btn-sm" onclick="editAsset('${asset.id}')" title="Editar">
             <i class="fas fa-edit"></i>
           </button>
@@ -640,4 +648,87 @@ window.toggleUserActive = (id) => {
 document.getElementById('btn-add-user')?.addEventListener('click', () => openUserModal('Nuevo Usuario'));
 document.getElementById('btn-user-modal-cancel')?.addEventListener('click', closeUserModal);
 document.getElementById('btn-user-modal-save')?.addEventListener('click', saveUser);
+
+// ── Loan & Return Management ─────────────────────────────────────────────
+
+const modalLoan = document.getElementById('modal-loan');
+const modalReturn = document.getElementById('modal-return');
+
+window.openLoanModal = (id) => {
+  const asset = state.assets.find(a => a.id === id);
+  if (!asset) return;
+  document.getElementById('loan-asset-id').value = id;
+  document.getElementById('loan-qty').max = asset.available;
+  document.getElementById('loan-qty').value = 1;
+  document.getElementById('loan-borrower-name').value = '';
+  document.getElementById('loan-borrower-rut').value = '';
+  modalLoan.classList.add('active');
+};
+
+window.closeLoanModal = () => { modalLoan?.classList.remove('active'); };
+
+window.saveLoan = () => {
+  const id = document.getElementById('loan-asset-id').value;
+  const qty = parseInt(document.getElementById('loan-qty').value);
+  const name = document.getElementById('loan-borrower-name').value.trim();
+  const rut = document.getElementById('loan-borrower-rut').value.trim();
+
+  if (!name) { alert('El nombre del solicitante es requerido.'); return; }
+  
+  const asset = state.assets.find(a => a.id === id);
+  if (asset && asset.available >= qty) {
+    asset.available -= qty;
+    asset.borrowed += qty;
+    state.recentScans.unshift({ asset: asset.name, user: name, time: 'Préstamo', status: 'active' });
+    renderInventory();
+    updateStats();
+    closeLoanModal();
+  } else {
+    alert('Cantidad no válida o stock insuficiente.');
+  }
+};
+
+window.openReturnModal = (id) => {
+  const asset = state.assets.find(a => a.id === id);
+  if (!asset) return;
+  document.getElementById('return-asset-id').value = id;
+  document.getElementById('return-qty').max = asset.borrowed;
+  document.getElementById('return-qty').value = 1;
+  document.getElementById('return-condition').value = 'good';
+  document.getElementById('return-notes').value = '';
+  modalReturn.classList.add('active');
+};
+
+window.closeReturnModal = () => { modalReturn?.classList.remove('active'); };
+
+window.saveReturn = () => {
+  const id = document.getElementById('return-asset-id').value;
+  const qty = parseInt(document.getElementById('return-qty').value);
+  const condition = document.getElementById('return-condition').value;
+  const notes = document.getElementById('return-notes').value.trim();
+
+  const asset = state.assets.find(a => a.id === id);
+  if (asset && asset.borrowed >= qty) {
+    asset.borrowed -= qty;
+    asset.available += qty;
+    
+    if (condition === 'damaged' || condition === 'incomplete') {
+      asset.status = 'maintenance';
+      state.recentScans.unshift({ asset: asset.name, user: state.user.name, time: 'Devolución c/ Daño', status: 'maintenance' });
+    } else {
+      state.recentScans.unshift({ asset: asset.name, user: state.user.name, time: 'Devuelto Ok', status: 'active' });
+    }
+    
+    renderInventory();
+    updateStats();
+    closeReturnModal();
+  } else {
+    alert('Cantidad a devolver no válida.');
+  }
+};
+
+document.getElementById('btn-loan-modal-cancel')?.addEventListener('click', closeLoanModal);
+document.getElementById('btn-loan-modal-save')?.addEventListener('click', saveLoan);
+document.getElementById('btn-return-modal-cancel')?.addEventListener('click', closeReturnModal);
+document.getElementById('btn-return-modal-save')?.addEventListener('click', saveReturn);
 
