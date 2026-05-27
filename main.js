@@ -347,6 +347,7 @@ function renderInventory() {
         </td>
         <td>${asset.description || ''}</td>
         <td>${asset.category}</td>
+        <td>${asset.owner || 'Laboratorio'}</td>
         <td>${asset.available} / ${asset.total}</td>
         <td><span class="status-badge status-${asset.status}">${formatStatus(asset.status)}</span></td>
         <td>${asset.location}</td>
@@ -399,6 +400,7 @@ function openModal(title, asset = null) {
     document.getElementById('asset-name').value = asset.name;
     document.getElementById('asset-desc').value = asset.description || '';
     document.getElementById('asset-category').value = asset.category;
+    document.getElementById('asset-owner').value = asset.owner || 'Laboratorio';
     document.getElementById('asset-status').value = asset.status;
     document.getElementById('asset-location').value = asset.location || '';
     document.getElementById('asset-total').value = asset.total || 0;
@@ -413,6 +415,7 @@ function openModal(title, asset = null) {
     document.getElementById('asset-nfc').value = '';
     document.getElementById('asset-name').value = '';
     document.getElementById('asset-desc').value = '';
+    document.getElementById('asset-owner').value = 'Laboratorio';
     document.getElementById('asset-total').value = '1';
     document.getElementById('asset-avail').value = '1';
     document.getElementById('asset-borrowed').value = '0';
@@ -428,6 +431,7 @@ function saveAsset() {
     name: document.getElementById('asset-name').value,
     description: document.getElementById('asset-desc').value,
     category: document.getElementById('asset-category').value,
+    owner: document.getElementById('asset-owner').value,
     status: document.getElementById('asset-status').value,
     total: parseInt(document.getElementById('asset-total').value) || 0,
     available: parseInt(document.getElementById('asset-avail').value) || 0,
