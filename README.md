@@ -11,9 +11,11 @@ Este es un sistema de gestión de inventario profesional diseñado específicame
 *   **🔐 Seguridad por Roles**:
     *   **Administrador**: Acceso total, gestión de activos y descarga de reportes.
     *   **Operador**: Lectura de tags, búsqueda y visualización de estados.
+*   **🤝 Préstamos y Devoluciones**: Sistema integrado para llevar el control de stock prestado y registrar su estado al recibirlo (Bueno, Dañado, Incompleto).
+*   **🏢 Propiedad de Activos**: Identificación clara para distinguir entre herramientas propias del Laboratorio y las prestadas por externos.
 *   **📄 Reportes Profesionales**: Exportación de datos en formatos **Excel (.xlsx)** y **PDF** con branding institucional.
 *   **♿ Accesibilidad (A11y)**: Modos configurables de **Alto Contraste** y **Texto Grande**, accesibles incluso desde la pantalla de login.
-*   **🎨 Diseño Institutional**: Interfaz moderna (Glassmorphism) basada en la paleta de colores oficial de INACAP (Rojo, Azul, Blanco).
+*   **🎨 Diseño Institucional**: Interfaz moderna basada en la paleta de colores oficial y logos oficiales de INACAP.
 
 ---
 
@@ -93,6 +95,11 @@ Se ha llevado a cabo un ciclo completo de auditoría y pruebas automatizadas (QA
    - Creación exitosa de usuarios operadores (ej. `Pedro QA` -> `pedro@inacap.cl`).
    - Almacenamiento seguro en la memoria local (`localStorage`).
    - Cierre de sesión seguro invalidando los tokens y estados activos.
+4. **Validación de Flujos de Préstamo y Devolución**:
+   - Comprobación de integridad numérica: No es posible prestar cantidades que excedan el stock `disponible` ni devolver cantidades mayores al stock `prestado`. Inconsistencias numéricas gatillan bloqueo y alerta.
+   - Cambio de estado automático: Al registrar una devolución con condición `Dañado` o `Incompleto`, el activo transita automáticamente al estado de `Mantenimiento` (bloqueando préstamos futuros de esa unidad).
+   - Registro en Dashboard inmediato.
+5. **Auditoría de Build**: Compilación verificada con `Vite build`, garantizando que todos los assets y nuevos flujos JS (`main.js`) no presentan errores de sintaxis y el árbol virtual carga eficientemente en producción.
 
 ### 🛡️ Corrección de Vulnerabilidad Crítica Detectada
 Durante el proceso de pruebas de calidad (QA), se identificó que el rol de **Operador** tenía acceso de escritura no autorizado sobre el inventario debido a que las columnas de edición y eliminación sobrescribían sus reglas de visibilidad CSS por un estilo `display:flex` embebido directamente en la etiqueta HTML (`style="display:flex"`).
