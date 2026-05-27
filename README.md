@@ -112,7 +112,7 @@ Durante el proceso de pruebas de calidad (QA), se identificó que el rol de **Op
 
 ## 👨‍💻 Contribución
 
-Este sistema fue desarrollado por **Macaperalta35** con el apoyo de la asistencia técnica de IA para el Fab Lab INACAP.
+Este sistema fue desarrollado por **Macaperalta35** para el Fab Lab INACAP.
 
 ---
 © 2024 INACAP - Sede Fab Lab. Todos los derechos reservados.
