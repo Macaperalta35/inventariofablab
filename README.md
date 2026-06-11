@@ -24,7 +24,9 @@ Este es un sistema de gestión de inventario profesional diseñado específicame
 *   **Core**: HTML5 Semántico, Vanilla JavaScript (ES6+).
 *   **Estilos**: CSS3 con Variables (Custom Properties) y diseño responsivo.
 *   **Build Tool**: [Vite](https://vitejs.dev/).
+*   **Base de Datos**: [Supabase](https://supabase.com/) (PostgreSQL en la nube, plan gratuito).
 *   **Librerías**:
+    *   `@supabase/supabase-js`: Cliente oficial de Supabase para el navegador.
     *   `xlsx`: Para la generación de reportes en Excel.
     *   `jspdf` & `jspdf-autotable`: Para la generación de documentos PDF.
     *   `FontAwesome`: Para la iconografía del sistema.
@@ -42,6 +44,39 @@ Para probar el sistema sin configuración previa, utilice las siguientes credenc
 
 ---
 
+## 🗄️ Base de Datos (Supabase)
+
+El sistema utiliza **Supabase** como base de datos en la nube. Todos los activos, usuarios y registros de préstamos se almacenan de forma persistente y accesible desde cualquier dispositivo.
+
+### Tablas principales
+
+| Tabla | Descripción |
+|---|---|
+| `assets` | Inventario completo de herramientas e insumos |
+| `users` | Usuarios del sistema con roles y contraseñas |
+| `loans` | Historial de préstamos y devoluciones |
+
+### Configurar Supabase para desarrollo local
+
+1. Crea un proyecto gratuito en [supabase.com](https://supabase.com).
+2. Ve a **SQL Editor → New query**, pega el contenido de [`supabase/schema.sql`](supabase/schema.sql) y ejecútalo. Esto crea las tablas, las políticas de acceso y carga el inventario inicial.
+3. Copia tus credenciales desde **Settings → API**.
+4. Crea un archivo `.env` en la raíz del proyecto (ver `.env.example`):
+    ```
+    VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+    VITE_SUPABASE_ANON_KEY=tu-anon-key
+    ```
+
+### Configurar para GitHub Pages (producción)
+
+En tu repositorio ve a **Settings → Secrets and variables → Actions** y agrega:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+El workflow de GitHub Actions inyecta estas variables automáticamente en cada deploy.
+
+---
+
 ## 📦 Instalación y Desarrollo Local
 
 1.  **Clonar el repositorio**:
@@ -50,17 +85,23 @@ Para probar el sistema sin configuración previa, utilice las siguientes credenc
     cd inventariofablab
     ```
 
-2.  **Instalar dependencias**:
+2.  **Configurar variables de entorno** (ver sección Base de Datos):
+    ```bash
+    cp .env.example .env
+    # Editar .env con tus credenciales de Supabase
+    ```
+
+3.  **Instalar dependencias**:
     ```bash
     npm install
     ```
 
-3.  **Ejecutar en modo desarrollo**:
+4.  **Ejecutar en modo desarrollo**:
     ```bash
     npm run dev
     ```
 
-4.  **Construir para producción**:
+5.  **Construir para producción**:
     ```bash
     npm run build
     ```
@@ -93,7 +134,7 @@ Se ha llevado a cabo un ciclo completo de auditoría y pruebas automatizadas (QA
 2. **Branding e Interfaz Limpia**: Validación visual del nuevo tema institucional en fondos claros (blanco puro y gris claro) con acentos de color **Rojo INACAP** e iconografía de alto contraste.
 3. **Gestión Completa de Usuarios**:
    - Creación exitosa de usuarios operadores (ej. `Pedro QA` -> `pedro@inacap.cl`).
-   - Almacenamiento seguro en la memoria local (`localStorage`).
+   - Almacenamiento seguro en la base de datos Supabase.
    - Cierre de sesión seguro invalidando los tokens y estados activos.
 4. **Validación de Flujos de Préstamo y Devolución**:
    - Comprobación de integridad numérica: No es posible prestar cantidades que excedan el stock `disponible` ni devolver cantidades mayores al stock `prestado`. Inconsistencias numéricas gatillan bloqueo y alerta.
